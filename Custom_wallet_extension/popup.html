@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ethereum Wallet Generator</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+        background-color: #f9f9f9;
+        color: #333;
+        width: 400px; /* Set the desired width */
+        height: 600px; /* Set the desired height */
+      }
+
+      h1,
+      h3 {
+        text-align: center;
+        color: #007bff;
+      }
+
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .section {
+        margin-bottom: 20px;
+        padding: 15px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        background-color: #fafafa;
+      }
+
+      .section h3 {
+        margin-bottom: 10px;
+        color: #555;
+      }
+
+      button {
+        margin: 5px 0;
+        padding: 10px;
+        width: 100%;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 14px;
+      }
+
+      button:hover {
+        background-color: #0056b3;
+      }
+
+      input,
+      select {
+        width: calc(100% - 20px);
+        padding: 8px;
+        margin: 5px 0;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: 14px;
+      }
+
+      ul {
+        padding: 0;
+        list-style-type: none;
+        margin: 0;
+      }
+
+      ul li {
+        margin: 5px 0;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        background-color: #fff;
+      }
+
+      .button-row {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      .key-box {
+        width: 100%; /* Adjust as needed */
+        max-height: 100px; /* Optional: Limit height */
+        padding: 10px;
+        margin: 10px 0;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        background-color: #f9f9f9;
+        font-family: monospace; /* Use monospace for keys */
+        word-wrap: break-word; /* Break long words */
+        overflow-x: auto; /* Allow horizontal scrolling for long text */
+      }
+
+      #transaction-status {
+        margin-top: 10px;
+        font-size: 14px;
+        color: #555;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Custom Ethereum Wallet</h1>
+
+      <!-- Generate Wallet -->
+      <div class="section">
+        <button id="generateWalletBtn">Generate Wallet</button>
+        <div id="walletDetails">
+          <pre id="output"></pre>
+        </div>
+      </div>
+
+      <!-- Wallet Selection -->
+      <div class="section">
+        <h3>Wallet Selection</h3>
+        <label for="wallet-select">Choose a Wallet:</label>
+        <select id="walletSelect">
+          <option value="">Select a Wallet</option>
+        </select>
+        <button id="removeWalletBtn">Remove Selected Wallet</button>
+      </div>
+
+      <!-- Chain Selection -->
+      <div class="section">
+        <h3>Connect to Chain</h3>
+        <select id="chain-select">
+          <option value="137">Polygon</option>
+          <option value="56">Binance Smart Chain</option>
+          <option value="1">Ethereum</option>
+        </select>
+        <div id="chain">Select a chain to connect</div>
+        <div id="balance">Balance: 0 ETH</div>
+      </div>
+
+      <!-- Input box for the amount to send -->
+      <input type="text" id="amountToSend" placeholder="Amount (in ETH)" />
+
+      <!-- Input box for the recipient address -->
+      <input
+        type="text"
+        id="recipientAddress"
+        placeholder="Recipient Address"
+      />
+
+      <!-- Button to send the transaction -->
+      <button id="sendTransactionBtn">Send Transaction</button>
+
+      <!-- Output area to show the transaction result -->
+      <div id="transactionResult"></div>
+
+      <script src="dist/bundle.js"></script>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,22 @@
+{
+  "manifest_version": 3,
+  "name": "Custom Ethereum Wallet",
+  "version": "1.0",
+  "description": "Generate Ethereum wallet keys and addresses.",
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Ethereum Wallet Generator"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "permissions": ["storage", "scripting"],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self';"
+  },
+  "host_permissions": ["https://mainnet.infura.io/*"],
+  "icons": {
+    "18": "icons/icon18.png",
+    "16": "icons/icon16.png"
+  }
+}
