@@ -1,134 +1,97 @@
 import { ethers } from "ethers";
-import { FlashbotsBundleProvider } from "@flashbots/ethers-provider-bundle";
+import {
+  FlashbotsBundleProvider,
+  FlashbotsBundleResolution,
+} from "@flashbots/ethers-provider-bundle";
 
-// Load environment variables from the .env file
-// Import the 'config' function from dotenv
 import { config } from "dotenv";
-// Load environment variables from the .env file
+// Initialize the environment variables
 config();
 
-// Access environment variables
+const CHAIN_ID = 11155111; // sepolia
+const FLASHBOTS_ENDPOINT = "https://relay-sepolia.flashbots.net";
+
 const privateKey = process.env.PRIVATE_KEY;
 const apiKey = process.env.API_KEY;
 
+// Create a new Ethereum provider using the API key for a JSON RPC provider
 const provider = new ethers.providers.JsonRpcProvider(apiKey);
 
-// Example: Using ethers.js with the Alchemy provider to get the balance of an address
+// Example wallet address for checking balance
 const walletAddress = "0xBBe2ded2c9E0C8B6f0D36ab8e533509f98Ce05aF";
+const recipientAddress = "0x7C03A3238C4A53bC87673e093Ffc0185866909Dd";
 
+// Create a wallet instance using the private key and provider
 const wallet = new ethers.Wallet(privateKey, provider);
 
-let nonce = 0;
+// Set a gas limit for the transaction
+const setGasLimit = 300000;
 
-provider.getBalance(walletAddress).then((balance) => {
-  console.log("Wallet balance (ETH):", ethers.utils.formatEther(balance));
-});
+// Fetch the current gas price from the provider and increase it by 50% to prioritize the transaction
+const gasPrice = await provider.getGasPrice();
+const increasedGasPrice = gasPrice.mul(600).div(100); // Add premium
 
-async function getFlashbotsProvider() {
-  const flashbotsProvider = await FlashbotsBundleProvider.create(
-    provider, // The Ethereum provider
-    wallet, // The wallet used to sign Flashbots requests
-    //"https://relay.flashbots.net", // Flashbots relay URL
-    //"mainnet" // Specify the network (mainnet or goerli)
+async function main() {
+  //   const signer = Wallet.createRandom();
+  const flashbot = await FlashbotsBundleProvider.create(
+    provider,
+    wallet,
+    //"https://relay.flashbots.net", // URL for the mainnet Flashbots relay
+    //"mainnet" // Network type (mainnet or goerli)
+    // You could also use the Sepolia or Goerli networks:
     "https://relay-sepolia.flashbots.net",
-    "sepolia" // Specify the network (mainnet or goerli)
+    "sepolia"
   );
+  provider.on("block", async (block) => {
+    console.log(`block: ${block}`);
 
-  return flashbotsProvider;
+    const signedTx = await flashbot.signBundle([
+      {
+        signer: wallet,
+        transaction: {
+          chainId: CHAIN_ID,
+          // EIP 1559 transaction
+          //type: 2,
+          value: 0,
+          data: "0x",
+          gasLimit: setGasLimit, // Gas limit for the transaction
+          gasPrice: increasedGasPrice, // Gas price with added premium
+          to: "0x7C03A3238C4A53bC87673e093Ffc0185866909Dd",
+        },
+      },
+    ]);
+
+    const targetBlock = block + 1;
+    const sim = await flashbot.simulate(signedTx, targetBlock);
+
+    if ("error" in sim) {
+      console.log(`simulation error: ${sim.error.message}`);
+    } else {
+      // console.log(`simulation success: ${JSON.stringify(sim, null, 2)}`);
+      console.log(`simulation success`);
+    }
+
+    const res = await flashbot.sendRawBundle(signedTx, targetBlock);
+    if ("error" in res) {
+      throw new Error(res.error.message);
+    }
+
+    const bundleResolution = await res.wait();
+    if (bundleResolution === FlashbotsBundleResolution.BundleIncluded) {
+      console.log(`Congrats, included in ${targetBlock}`);
+      console.log(JSON.stringify(sim, null, 2));
+      process.exit(0);
+    } else if (
+      bundleResolution === FlashbotsBundleResolution.BlockPassedWithoutInclusion
+    ) {
+      console.log(`Not included in ${targetBlock}`);
+    } else if (
+      bundleResolution === FlashbotsBundleResolution.AccountNonceTooHigh
+    ) {
+      console.log("Nonce too high, bailing");
+      process.exit(1);
+    }
+  });
 }
 
-getFlashbotsProvider().then((flashbotsProvider) => {
-  console.log("Connected to Flashbots relay!");
-});
-
-async function sendBundle() {
-  const flashbotsProvider = await getFlashbotsProvider();
-  const blockNumber = await provider.getBlockNumber();
-
-  // Fetch the current nonce for the sender's address
-  nonce = await provider.getTransactionCount(wallet.address, "pending");
-  console.log("nonce: " + nonce);
-
-  const transaction = {
-    to: "0x7C03A3238C4A53bC87673e093Ffc0185866909Dd",
-    value: ethers.utils.parseEther("0.1"),
-    gasLimit: 210000,
-    gasPrice: ethers.utils.parseUnits("500", "gwei"),
-    nonce: nonce,
-    data: "0x", // Ensure this is a valid transaction data field
-  };
-
-  // Fetch the current nonce for the sender's address
-  nonce = await provider.getTransactionCount(wallet.address, "pending");
-  console.log("nonce: " + nonce);
-
-  const signedTransaction = await wallet.signTransaction(transaction);
-
-  const blockCoinbase = await provider
-    .getBlock(blockNumber)
-    .then((block) => block.miner);
-  const minerTipTransaction = {
-    to: blockCoinbase,
-    value: ethers.utils.parseEther("0.1"), // Tip 0.1 ETH
-    gasLimit: 210000,
-    nonce: nonce + 1,
-    gasPrice: ethers.utils.parseUnits("500", "gwei"),
-  };
-
-  const signedTipTransaction = await wallet.signTransaction(
-    minerTipTransaction
-  );
-
-  const bundle = [
-    { signedTransaction },
-    { signedTransaction: signedTipTransaction },
-  ];
-
-  //const bundle = [{ signedTransaction }];
-
-  const signedTransactions = await flashbotsProvider.signBundle(bundle);
-  const simulation = await flashbotsProvider.simulate(
-    signedTransactions,
-    //blockNumber,
-    blockNumber + 1
-    //blockNumber + 2
-    //blockNumber + 3
-  );
-  //console.log(JSON.stringify(simulation, null, 2));
-
-  if ("error" in simulation) {
-    console.error("Simulation failed:", simulation.error.message);
-    return;
-  } else {
-    console.log("Simulation successful:", simulation);
-  }
-
-  const bundlePromises = await flashbotsProvider.sendRawBundle(
-    signedTransactions,
-    blockNumber + 1,
-    blockNumber + 2,
-    blockNumber + 3,
-    blockNumber + 4,
-    blockNumber + 5,
-    blockNumber + 6,
-    blockNumber + 7,
-    blockNumber + 8,
-    blockNumber + 9
-  );
-
-  if ("error" in bundlePromises) {
-    console.error("Error in bundlePromises:", bundlePromises.error.message);
-    return;
-  }
-
-  /*
-  const receipt = await bundlePromises.wait();
-  if (receipt === 0) {
-    console.log("Bundle successfully included in block");
-  } else {
-    console.log("Bundle not included in block");
-  }
-    */
-}
-
-sendBundle();
+main();
