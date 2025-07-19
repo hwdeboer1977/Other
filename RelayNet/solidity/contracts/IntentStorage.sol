@@ -52,7 +52,8 @@ contract IntentStorage {
     );
 
     // Emitted when an intent is cancelled (deleted)
-    event IntentCancelled(address indexed user);
+    event IntentCancelled(address indexed user, uint8 platform, bytes32 coin);
+
 
     // Create a new trading intent
     // Overwrites any existing intent for msg.sender
@@ -106,8 +107,13 @@ contract IntentStorage {
 
     // Clear the user's current intent
     function clearIntent() external {
+        Intent memory intent = intents[msg.sender]; // Copy to memory before deleting
+
+        require(intent.status == Status.Active, "No active intent to clear");
+
+        emit IntentCancelled(msg.sender, uint8(intent.platform), intent.coin);
+
         delete intents[msg.sender];
-        emit IntentCancelled(msg.sender);
     }
 
     // View a user's intent
