@@ -33,6 +33,43 @@ contract = w3.eth.contract(address=Web3.to_checksum_address(CONTRACT_ADDRESS), a
 def decode_bytes32(b):
     return Web3.to_text(b).rstrip("\x00")
 
+# Function to get account summary (margins, balances, open orders and positions)
+def print_account_summary(address, info, user_state):
+    print(f"\n🔎 Account Summary for: {address}")
+
+    # === Margin summary
+    print("\n=== 💰 Margin Summary ===")
+    margin = user_state.get("marginSummary", {})
+    for key, val in margin.items():
+        print(f"{key}: {val}")
+
+    # === Balances
+    print("\n=== 🏦 Wallet Balances ===")
+    balances = user_state.get("balances", [])
+    for bal in balances:
+        coin = bal.get("coin")
+        wallet = bal.get("walletBalance")
+        available = bal.get("availableBalance")
+        print(f"{coin}: wallet={wallet}, available={available}")
+
+    # === Open orders
+    open_orders = info.open_orders(address)
+    print("\n=== 📑 Open Orders ===")
+    if open_orders:
+        print(json.dumps(open_orders, indent=2))
+    else:
+        print("None")
+
+    # === Open positions
+    positions = user_state.get("assetPositions", [])
+    open_positions = [p for p in positions if float(p.get("position", {}).get("szi", 0)) != 0.0]
+
+    print("\n=== 📈 Open Positions ===")
+    if open_positions:
+        print(json.dumps(open_positions, indent=2))
+    else:
+        print("None")    
+
 # Helper: sign and send transaction
 def send_transaction(tx_func):
     nonce = w3.eth.get_transaction_count(account.address)
@@ -106,11 +143,28 @@ def check_intent():
     logger.info("Min Price: %s", Web3.from_wei(intent[4], "ether"))
     logger.info("Status: %s", ["None", "Active", "Cancelled"][intent[6]])
 
+# Command: Print account summary
+def summary():
+    try:
+        import example_utils
+        from hyperliquid.utils import constants
+
+        # Setup Hyperliquid client
+        address, info, exchange = example_utils.setup(
+            base_url=constants.MAINNET_API_URL,
+            skip_ws=True
+        )
+        user_state = info.user_state(address)
+        print_account_summary(address, info, user_state)
+
+    except Exception as e:
+        logger.error("❌ Error in summary: %s", str(e))
+
 
 # CLI dispatcher
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        logger.info("Usage: python createIntent.py [create|update|delete|check]")
+        logger.info("Usage: python createIntent.py [create|update|delete|check|summary]")
         sys.exit(1)
 
     cmd = sys.argv[1].lower()
@@ -119,10 +173,11 @@ if __name__ == "__main__":
         "update": update_intent,
         "delete": delete_intent,
         "check": check_intent,
+        "summary": summary,
     }
 
     if cmd in actions:
         actions[cmd]()
     else:
         logger.error("❌ Unknown command: %s", cmd)
-        logger.info("Available commands: create, update, delete, check")
+        logger.info("Available commands: create, update, delete, check, summary")
