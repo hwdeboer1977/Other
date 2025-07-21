@@ -88,4 +88,8 @@ Follow these steps to set up and execute RelayNet:
 
      # View current intent details
      python src/createIntent.py check
+
+     # View current account status (balances, positions etc)
+     python src/createIntent.py summary
+
      ```
