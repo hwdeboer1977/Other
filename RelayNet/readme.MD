@@ -9,7 +9,7 @@ RelayNet supports both human users and autonomous AI agents, making it ideal for
 
 ## ✨ Features
 
-### ✅ On-Chain Smart Contract (`IntentStorage.sol`)
+### ✅ On-Chain Smart Contract 
 
 *Located at:* `RelayNet/solidity/contracts/IntentStorage.sol`
 
@@ -38,7 +38,7 @@ RelayNet supports both human users and autonomous AI agents, making it ideal for
 
 ---
 
-### 🧠 Intent Management CLI (`createIntent.py`)
+### 🧠 Intent Management CLI 
 
 *Located at:* `RelayNet/src/createIntent.py`
 
