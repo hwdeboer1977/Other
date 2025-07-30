@@ -9,29 +9,50 @@ RelayNet supports both human users and autonomous AI agents, making it ideal for
 
 ## ✨ Features
 
-- ✅ **On-chain `IntentStorage` contract** written in Solidity
-  Located at `RelayNet/solidity/contracts/IntentStorage.sol`
+### ✅ On-Chain Smart Contract (`IntentStorage.sol`)
 
-  - Stores user trade instructions using a `struct Intent`
+*Located at:* `RelayNet/solidity/contracts/IntentStorage.sol`
+
+- Stores trade instructions via the `Intent` struct:
   - Fields: `platform`, `coin`, `side`, `size`, `minPrice`, `timestamp`, `status`
-  - Uses typed `enum` structures for platform, side, and status to reduce ambiguity and improve auditability
-  - Deploy this contract to **Arbitrum mainnet**
+- Uses Solidity `enum` types to reduce ambiguity (`Platform`, `Side`, `Status`)
+- Designed for deployment on **Arbitrum mainnet**
+- Lifecycle functions:
+  - `createIntent()` – Submit a new intent
+  - `updateIntent()` – Modify an existing intent
+  - `clearIntent()` – Cancel the intent
 
-- 🌀 **Full intent lifecycle** with following Solidity functions:
+---
 
-  - `createIntent()` – submit a new trade intent
-  - `updateIntent()` – modify active intent
-  - `clearIntent()` – cancel and remove intent
+### 🔄 Off-Chain Relayer
 
-- 🔄 **Off-chain relayer** written in Python
+*Located at:* `RelayNet/src/relayer.py`
 
-  - Listens for on-chain events:  
-    `IntentCreated`, `IntentUpdated`, `IntentCancelled`
-  - Executes trades and cancellations on **Hyperliquid** based on the on-chain intent state
-  - Actions performed:
-    - Market buys and sells
-    - Order cancellation
-    - Order updates (cancel + replace)
+- Listens to on-chain events:
+  - `IntentCreated`, `IntentUpdated`, `IntentCancelled`
+- Executes or cancels trades on **Hyperliquid** based on on-chain state
+- Supported actions:
+  - Market buys and sells
+  - Order cancellation
+  - Cancel + replace for updates
+
+---
+
+### 🧠 Intent Management CLI (`createIntent.py`)
+
+*Located at:* `RelayNet/src/createIntent.py`
+
+- Command-line tool for managing intents via user or agent
+- Sends signed transactions to the `IntentStorage` contract
+- Supported commands:
+  - `create` – Create a new intent
+  - `update` – Modify existing intent
+  - `delete` – Cancel current intent
+  - `check` – View on-chain intent
+  - `summary` – View wallet balances and positions
+- Ideal for automation, bot agents, or manual interaction
+
+---
 
 - 🌉 **Cross-chain-ready architecture**
 
