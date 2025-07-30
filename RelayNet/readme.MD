@@ -1,7 +1,9 @@
 # 🔁 RelayNet
 
-RelayNet is an intent-based execution protocol that connects on-chain users with off-chain relayers.  
-It enables decentralized trade intent creation and automated execution across trading platforms such as **Hyperliquid** and **Drift**.
+**RelayNet** is a decentralized intent-based execution protocol that bridges **on-chain intent creation** with **off-chain trade execution**. It enables users (or agents acting on their behalf) to submit trade instructions on-chain. A **stateless off-chain relayer** listens for these instructions and automatically executes trades on platforms like **Hyperliquid** or **Drift**.
+
+RelayNet supports both human users and autonomous AI agents, making it ideal for automated DeFi strategies such as arbitrage, delta-neutral trading, or AI-driven yield farming. The user or agent defines the **intent** (e.g., “short ETH if price drops below $2,500”)—and the relayer does the rest.
+
 
 ---
 
