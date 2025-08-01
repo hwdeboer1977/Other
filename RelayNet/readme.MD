@@ -9,6 +9,12 @@ RelayNet supports both human users and autonomous AI agents, making it ideal for
 
 ## ✨ Features
 
+### 🧠 System Architecture: AI Agent Intent Flow
+
+This system allows an AI agent to express a trading intent on-chain, which is later executed by a relayer bot.
+
+![AI Agent Intent Flow](images/ai_agent_flow.png)
+
 ### ✅ On-Chain Smart Contract 
 
 *Located at:* `RelayNet/solidity/contracts/IntentStorage.sol`
@@ -53,6 +59,8 @@ RelayNet supports both human users and autonomous AI agents, making it ideal for
 - Ideal for automation, bot agents, or manual interaction
 
 ---
+
+
 
 - 🌉 **Cross-chain-ready architecture**
 
