@@ -29,11 +29,24 @@ A basic React-based decentralized application (dApp). Includes:
 - Interaction with smart contracts (e.g., read/write functions)
 - Boilerplate for future expansion
 
+### 4. `RelayNet`
+
+An intent-based execution protocol that bridges on-chain intent creation with off-chain trading on platforms like Hyperliquid or Drift. Features:
+
+- AI Agent or user creates a trade **intent** (e.g., short ETH at $2500)
+- **Smart contract** stores the intent on-chain (`IntentStorage.sol`)
+- **Off-chain relayer** listens to events and executes the trade on Hyperliquid
+- Modular CLI tool for creating, updating, and managing intents
+- Useful for automated strategies: arbitrage, delta-neutral LP, AI trading
+
+📄 See `RelayNet/README.md` for full documentation.
+
 ## 📦 Tech Stack
 
 - **Solidity**
 - **JavaScript**
 - **HTML**
+- **Python**
 - **React**
 - **ethers.js**
 - **Chrome Extension APIs**
@@ -47,4 +60,3 @@ cd <ProjectFolder>
 # For React-based projects
 npm install
 npm start
-```
